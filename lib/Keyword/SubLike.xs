@@ -11,6 +11,8 @@
 #define active_keywords_hv()  MY_active_keywords_hv(aTHX)
 static HV *MY_active_keywords_hv(pTHX)
 {
+/* TODO: #ifdef MULTIPLICITY and look in PL_modglobal.
+ */
   static HV *kw = NULL;
   if(!kw)
     kw = newHV();
