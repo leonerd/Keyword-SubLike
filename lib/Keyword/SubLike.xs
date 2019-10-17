@@ -22,37 +22,6 @@ static HV *MY_active_keywords_hv(pTHX)
   return kw;
 }
 
-#define lex_scan_parenthesized()  MY_lex_scan_parenthesized(aTHX)
-static SV *MY_lex_scan_parenthesized(pTHX)
-{
-  I32 c;
-  int parencount = 0;
-  SV *ret = newSVpvs("");
-  if(lex_bufutf8())
-    SvUTF8_on(ret);
-
-  c = lex_peek_unichar(0);
-
-  while(c != -1) {
-    sv_cat_c(ret, lex_read_unichar(0));
-
-    switch(c) {
-      case '(': parencount++; break;
-      case ')': parencount--; break;
-    }
-    if(!parencount)
-      break;
-
-    c = lex_peek_unichar(0);
-  }
-
-  if(SvCUR(ret))
-    return ret;
-
-  SvREFCNT_dec(ret);
-  return NULL;
-}
-
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 static int my_keyword_plugin(pTHX_ char *kw, STRLEN kwlen, OP **op_ptr)
