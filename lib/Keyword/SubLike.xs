@@ -8,6 +8,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#include "lexer-additions.c.inc"
+
 #define active_keywords_hv()  MY_active_keywords_hv(aTHX)
 static HV *MY_active_keywords_hv(pTHX)
 {
@@ -18,51 +20,6 @@ static HV *MY_active_keywords_hv(pTHX)
     kw = newHV();
 
   return kw;
-}
-
-#define sv_cat_c(sv, c)  MY_sv_cat_c(aTHX_ sv, c)
-static void MY_sv_cat_c(pTHX_ SV *sv, U32 c)
-{
-  char ds[UTF8_MAXBYTES + 1], *d;
-  d = (char *)uvchr_to_utf8((U8 *)ds, c);
-  if (d - ds > 1) {
-    sv_utf8_upgrade(sv);
-  }
-  sv_catpvn(sv, ds, d - ds);
-}
-
-#define lex_scan_ident()  MY_lex_scan_ident(aTHX)
-static SV *MY_lex_scan_ident(pTHX)
-{
-  /* Inspired by
-   *   https://metacpan.org/source/MAUKE/Function-Parameters-1.0705/Parameters.xs#L265
-   */
-  I32 c;
-  bool at_start;
-  SV *ret = newSVpvs("");
-  if(lex_bufutf8())
-    SvUTF8_on(ret);
-
-  at_start = TRUE;
-
-  c = lex_peek_unichar(0);
-
-  while(c != -1) {
-    if(at_start ? isIDFIRST_uni(c) : isALNUM_uni(c)) {
-      at_start = FALSE;
-      sv_cat_c(ret, lex_read_unichar(0));
-
-      c = lex_peek_unichar(0);
-    }
-    else
-      break;
-  }
-
-  if(SvCUR(ret))
-    return ret;
-
-  SvREFCNT_dec(ret);
-  return NULL;
 }
 
 #define lex_scan_parenthesized()  MY_lex_scan_parenthesized(aTHX)

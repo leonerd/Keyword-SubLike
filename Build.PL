@@ -16,6 +16,8 @@ my $build = Module::Build->new(
    license => 'perl',
    create_license => 1,
    create_readme  => 1,
+
+   extra_compiler_flags => [qw( -Ihax )],
 );
 
 $build->create_build_script;
